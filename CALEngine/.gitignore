@@ -1,0 +1,4 @@
+*.o
+*.d
+bmi_fcgi
+corpus_parser
