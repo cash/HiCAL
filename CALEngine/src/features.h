@@ -9,9 +9,6 @@
 #include "dataset.h"
 
 namespace features{
-    inline bool is_valid(char ch){
-        return isalpha(ch) || isdigit(ch);
-    }
 
     void init(const std::string &fname);
 
