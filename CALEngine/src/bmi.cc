@@ -8,39 +8,27 @@
 #include "utils/utils.h"
 
 using namespace std;
-BMI::BMI(Seed _seed,
+BMI::BMI(
          Dataset *_documents,
          int _num_threads,
          int _judgments_per_iteration,
          bool _async_mode,
-         int _training_iterations,
-         bool initialize)
+         int _training_iterations
+         )
     :documents(_documents),
     num_threads(_num_threads),
     judgments_per_iteration(_judgments_per_iteration),
     async_mode(_async_mode),
-    seed(_seed),
     training_iterations(_training_iterations)
 {
     is_bmi = (judgments_per_iteration == -1);
     if(is_bmi || _async_mode)
         judgments_per_iteration = 1;
 
-    // initialize training data structures
-    for(auto &judgment: seed){
-        if(judgment.second > 0)
-            positives.push_back(&judgment.first);
-        else
-            negatives.push_back(&judgment.first);
-    }
-
     // make space for random non_rel documents
     random_negatives_index = negatives.size();
     for(int i = 0; i < random_negatives_size; i++)
         negatives.push_back(nullptr);
-
-    if(initialize)
-        perform_iteration();
 }
 
 void BMI::perform_iteration(){

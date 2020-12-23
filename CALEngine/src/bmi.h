@@ -42,7 +42,6 @@ class BMI{
     std::mt19937 rand_generator;
 
     // Current of dataset being used to train the classifier
-    const Seed seed;
     std::map<int, int> judgments;
     vector<const SfSparseVector*> positives, negatives;
     int random_negatives_index;
@@ -79,13 +78,13 @@ class BMI{
     void sync_training_cache();
 
     public:
-    BMI(Seed seed,
+    BMI(
         Dataset *documents,
         int num_threads,
         int judgments_per_iteration,
         bool async_mode,
-        int training_iterations,
-        bool initialize = true);
+        int training_iterations
+        );
 
     // Handler for performing a training iteration
     virtual std::vector<int> perform_training_iteration();

@@ -150,52 +150,31 @@ void begin_session_view(const FCGX_Request & request, const vector<pair<string, 
         return;
     }
 
-    if(session_id.size() == 0 || query.size() == 0){
-        write_response(request, 400, "application/json", "{\"error\": \"Non empty session_id and query required\"}");
+    if(session_id.size() == 0){
+        write_response(request, 400, "application/json", "{\"error\": \"Non empty session_id\"}");
         return;
     }
 
-    Seed seed_query = {{features::get_features(query, *documents.get()), 1}};
+    if(seed_judgments.size() == 0){
+        write_response(request, 400, "application/json", "{\"error\": \"seed_judgments is required\"}");
+        return;
+    }
 
     if(mode == "doc"){
         SESSIONS[session_id] = make_unique<BMI>(
-                seed_query,
                 documents.get(),
                 CMD_LINE_INTS["--threads"],
                 judgments_per_iteration,
                 async_mode,
-                200000);
-    }else if(mode == "para"){
-        SESSIONS[session_id] = make_unique<BMI_para>(
-                seed_query,
-                documents.get(),
-                paragraphs.get(),
-                CMD_LINE_INTS["--threads"],
-                judgments_per_iteration,
-                async_mode,
-                200000);
-    }else if(mode == "para_scal"){
-        SESSIONS[session_id] = make_unique<BMI_para_scal>(
-                seed_query,
-                documents.get(),
-                paragraphs.get(),
-                CMD_LINE_INTS["--threads"],
-                200000, 25, seed_judgments);
-    }else if(mode == "doc_scal"){
-        SESSIONS[session_id] = make_unique<BMI_doc_scal>(
-                seed_query,
-                documents.get(),
-                CMD_LINE_INTS["--threads"],
-                200000, 25, seed_judgments);
+                200000
+                );
     }else {
         write_response(request, 400, "application/json", "{\"error\": \"Invalid mode\"}");
         return;
     }
 
-    if(mode != "para_scal"){
-        SESSIONS[session_id]->record_judgment_batch(seed_judgments);
-        SESSIONS[session_id]->perform_training_iteration();
-    }
+    SESSIONS[session_id]->record_judgment_batch(seed_judgments);
+    SESSIONS[session_id]->perform_training_iteration();
 
     // need proper json parsing!!
     write_response(request, 200, "application/json", "{\"session-id\": \""+session_id+"\"}");
