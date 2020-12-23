@@ -2,9 +2,7 @@
 #include <thread>
 #include <fcgio.h>
 #include "utils/simple-cmd-line-helper.h"
-#include "bmi_para.h"
-#include "bmi_para_scal.h"
-#include "bmi_doc_scal.h"
+#include "bmi.h"
 #include "features.h"
 #include "utils/feature_parser.h"
 #include "utils/utils.h"
