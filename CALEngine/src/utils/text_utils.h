@@ -63,4 +63,11 @@ class BMITokenizer:public Tokenizer {
 public:
     std::vector<std::string> tokenize(const std::string &text) override;
 };
+
+class Scale21Tokenizer:public Tokenizer {
+    MinLengthFilter min_length_filter = MinLengthFilter(2);
+public:
+    std::vector<std::string> tokenize(const std::string &text) override;
+};
+
 #endif // TEXT_UTILS_H

@@ -77,7 +77,7 @@ int main(int argc, char **argv){
     size_t num_docs = 0;
 
     cerr<<"Beginning Pass 1"<<endl;
-    BMITokenizer tokenizer = BMITokenizer();
+    Scale21Tokenizer tokenizer = Scale21Tokenizer();
     // Pass 1: get corpus stat and compute term frequencies
     {
         unique_ptr<FeatureWriter> fw_1;
@@ -125,6 +125,7 @@ int main(int argc, char **argv){
         fw_1->finish();
     }
     cerr<<endl<<"Computing idf"<<endl;
+    cerr<<"Dictionary size: " << dictionary.size() << endl;
 
     vector<int> new_ids(dictionary.size());
     for(int i = 0; i < dictionary.size(); i++){

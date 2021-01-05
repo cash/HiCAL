@@ -52,3 +52,23 @@ std::vector<std::string> BMITokenizer::tokenize(const std::string &text) {
     }
     return tokens;
 }
+
+std::vector<std::string> Scale21Tokenizer::tokenize(const std::string &text) {
+    vector<string> tokens;
+    int st = 0;
+    int length = (int)text.length();
+    while(st < length){
+        int end = 0;
+        // tokenize on spaces
+        while(text[st+end] != ' ' && text[st+end] != '\n' && (st + end) < length){
+            end++;
+        }
+        if(end > 0 && (st + end) < length){
+            auto token = text.substr(st, end);
+            if(min_length_filter.filter(token))
+                tokens.push_back(token);
+        }
+        st += end + 1;
+    }
+    return tokens;
+}
