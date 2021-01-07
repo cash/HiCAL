@@ -1,4 +1,5 @@
 #include <fstream>
+#include <string>
 #include <thread>
 #include <fcgio.h>
 #include "utils/simple-cmd-line-helper.h"
@@ -81,7 +82,7 @@ void write_response(const FCGX_Request & request, int status, string content_typ
                     << content << "\n";
     /* if(content.length() > 50) */
     /*     content = content.substr(0, 50) + "..."; */
-    cerr<<"Wrote response: "<<content<<endl;
+    bmi_log("Wrote response: " + content);
 }
 
 bool parse_seed_judgments(const string &str, vector<pair<string, int>> &seed_judgments){
@@ -357,12 +358,13 @@ void judge_view(const FCGX_Request & request, const vector<pair<string, string>>
 }
 
 void log_request(const FCGX_Request & request, const vector<pair<string, string>> &params){
-    cerr<<string(FCGX_GetParam("RELATIVE_URI", request.envp))<<endl;
-    cerr<<FCGX_GetParam("REQUEST_METHOD", request.envp)<<endl;
+    string endpoint = string(FCGX_GetParam("RELATIVE_URI", request.envp));
+    string method = FCGX_GetParam("REQUEST_METHOD", request.envp);
+
+    bmi_log("Request (" + method + ") on " + endpoint);
     for(auto kv: params){
-        cerr<<kv.first<<" "<<kv.second<<endl;
+        bmi_log("param " + kv.first + ": " + kv.second);
     }
-    cerr<<endl;
 }
 
 void process_request(const FCGX_Request & request) {
@@ -439,7 +441,7 @@ int main(int argc, char **argv){
 
     // Load docs
     TIMER_BEGIN(documents_loader);
-    cerr<<"Loading document features on memory"<<endl;
+    bmi_log("Loading document features into memory");
     {
         unique_ptr<FeatureParser> feature_parser;
         if(CMD_LINE_STRINGS["--df"].size() > 0)
@@ -447,26 +449,9 @@ int main(int argc, char **argv){
         else
             feature_parser = make_unique<BinFeatureParser>(CMD_LINE_STRINGS["--doc-features"]);
         documents = Dataset::build(feature_parser.get());
-        cerr<<"Read "<<documents->size()<<" docs"<<endl;
+        bmi_log("Read " + to_string(documents->size()) + " docs");
     }
     TIMER_END(documents_loader);
-
-    // Load para
-    string para_features_path = CMD_LINE_STRINGS["--para-features"];
-    if(para_features_path.length() > 0){
-        TIMER_BEGIN(paragraph_loader);
-        cerr<<"Loading paragraph features on memory"<<endl;
-        {
-            unique_ptr<FeatureParser> feature_parser;
-            if(CMD_LINE_STRINGS["--df"].size() > 0)
-                feature_parser = make_unique<BinFeatureParser>(para_features_path, "");
-            else
-                feature_parser = make_unique<BinFeatureParser>(para_features_path);
-            paragraphs = ParagraphDataset::build(feature_parser.get(), *documents);
-            cerr<<"Read "<<paragraphs->size()<<" paragraphs"<<endl;
-        }
-        TIMER_END(paragraph_loader);
-    }
 
     FCGX_Init();
 

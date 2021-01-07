@@ -3,6 +3,7 @@
 #include <thread>
 #include <algorithm>
 #include <climits>
+#include <string>
 #include "bmi.h"
 #include "classifier.h"
 #include "utils/utils.h"
@@ -34,7 +35,7 @@ BMI::BMI(
 void BMI::perform_iteration(){
     lock_guard<mutex> lock(state_mutex);
     auto results = perform_training_iteration();
-    cerr<<"Fetched "<<results.size()<<" documents"<<endl;
+    bmi_log("Fetched " + to_string(results.size()) + " documents");
     add_to_judgment_list(results);
     if(!async_mode){
         state.next_iteration_target = min(state.next_iteration_target + judgments_per_iteration, (uint32_t)get_dataset()->size());
@@ -60,7 +61,7 @@ vector<float> BMI::train(){
         negatives[random_negatives_index + i] = &documents->get_sf_sparse_vector(idx);
     }
 
-    std::cerr<<"Training on "<<positives.size()<<" +ve docs and "<<negatives.size()<<" -ve docs"<<std::endl;
+    bmi_log("Training on " + to_string(positives.size()) + " pos docs and " + to_string(negatives.size()) + " neg docs");
     
     return LRPegasosClassifier(training_iterations).train(positives, negatives, documents->get_dimensionality());
 }
@@ -123,7 +124,7 @@ void BMI::sync_training_cache() {
     lock_guard<mutex> lock(training_cache_mutex);
     for(pair<int, int> training: training_cache){
         if(judgments.find(training.first) != judgments.end()){
-            std::cerr<<"Rewriting judgment history"<<std::endl;
+            bmi_log("Rewriting judgment history");
             if(judgments[training.first] > 0){
                 for(int i = (int)positives.size() - 1; i > 0; i--){
                     if(documents->get_index(positives[i]->doc_id) == training.first){
