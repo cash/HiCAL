@@ -104,6 +104,10 @@ void BMI::add_to_training_cache(int id, int judgment){
 void BMI::record_judgment_batch(vector<pair<string, int>> _judgments){
     for(const auto &judgment: _judgments){
         size_t id = documents->get_index(judgment.first);
+        if (id == documents->NPOS){
+            bmi_log("Error: unknown doc " + judgment.first);
+            continue;
+        }
         add_to_training_cache(id, judgment.second);
     }
 
